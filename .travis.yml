@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t pavelulasavets/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run pavelulasavets/react-test npm run test -- --coverage
+
+after_success:
+  - docker build -t pavelulasavets/multi-client ./client
+  - docker build -t pavelulasavets/multi-worker ./worker
+  - docker build -t pavelulasavets/multi-server ./server
+  - docker build -t pavelulasavets/multi-nging ./nginx
+  - echo $DOCKER_PASSWORD | docker login -u $DOCKER_ID --password-stdin
+  - docker push pavelulasavets/multi-client
+  - docker push pavelulasavets/multi-worker
+  - docker push pavelulasavets/multi-server
+  - docker push pavelulasavets/multi-nginx
+
